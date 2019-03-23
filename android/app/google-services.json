@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "688126838139",
+    "firebase_url": "https://eco-connet.firebaseio.com",
+    "project_id": "eco-connet",
+    "storage_bucket": "eco-connet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688126838139:android:9c01ed3f844dda3b",
+        "android_client_info": {
+          "package_name": "xyz.jointtask.eco_connect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "688126838139-ju7trlf6uda5lrer8357c1r3rbdtf3ij.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "xyz.jointtask.eco_connect",
+            "certificate_hash": "9a2fe8645c53c894717176dedb55a8f78c523cab"
+          }
+        },
+        {
+          "client_id": "688126838139-rt8k5ocp6pf0219jraid4561nh61qvq5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "xyz.jointtask.eco_connect",
+            "certificate_hash": "9f3e4e6437baf3cbf7c3142342f43fe463f45e6f"
+          }
+        },
+        {
+          "client_id": "688126838139-i5qkscbjdgfs0ffrhs12meqirrrp3i95.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEjUyD-Dp35s5KHJpBu8VddRlRFfYFYGs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "688126838139-i5qkscbjdgfs0ffrhs12meqirrrp3i95.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
