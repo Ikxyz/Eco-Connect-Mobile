@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:path/path.dart' as xPath;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:eco_connect/classes/classes.dart';
@@ -8,6 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:random_string/random_string.dart' as random;
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DesignTemplate extends Clasess {
   BuildContext context;
@@ -37,6 +41,38 @@ class DesignTemplate extends Clasess {
     if (stamp == 'online' || stamp == "Online") return stamp;
 
     return timeago.format(stamp);
+  }
+
+  Future<File> getImage({bool camera: true}) async {
+    var image = await ImagePicker.pickImage(
+        source: camera ? ImageSource.camera : ImageSource.gallery);
+    return image;
+  }
+
+  showSnackBar(GlobalKey<ScaffoldState> _scaffoldState, String content) {
+    if (_scaffoldState.currentState == null) return;
+    _scaffoldState.currentState.showSnackBar(SnackBar(
+      content: Text(content),
+    ));
+  }
+
+  Future<dynamic> uploadFile(File file, String uid, {String location}) async {
+    if (uid == null) {
+      print('User id is null');
+      return null;
+    }
+    if (location == null) location = 'profile'; //default location
+
+    final String fileExt = xPath.basename(file.path).split('.')[1];
+    final StorageReference _ref =
+        FirebaseStorage().ref().child(location).child('$uid.$fileExt');
+    final upload = await _ref.putFile(file);
+    bool ok = await upload.events.any((eve) {
+      if (eve.type == StorageTaskEventType.success) return true;
+      return false;
+    });
+    if (ok) return await upload.lastSnapshot.ref.getDownloadURL();
+    return null;
   }
 
   Widget chatBubble(
@@ -167,8 +203,8 @@ class DesignTemplate extends Clasess {
     return TextFormField(
       controller: controller,
       autofocus: false,
+      style: TextStyle(color: Theme.of(context).primaryColor),
       decoration: InputDecoration(
-          contentPadding: EdgeInsets.all(8),
           hintText: hintText,
           labelText: labelText,
           prefix: prefix,
@@ -176,6 +212,22 @@ class DesignTemplate extends Clasess {
           helperText: helperText,
           prefixIcon: prefixIcon,
           errorText: errorText,
+          hintStyle: TextStyle(color: Theme.of(context).primaryColor),
+          suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+          border: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          ),
+          helperStyle: TextStyle(color: Theme.of(context).primaryColor),
+          labelStyle: TextStyle(color: Theme.of(context).primaryColor),
+          prefixStyle: TextStyle(color: Theme.of(context).primaryColor),
+          fillColor: Theme.of(context).primaryColor,
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          ),
+          counterStyle: TextStyle(color: Theme.of(context).primaryColor),
           errorStyle: TextStyle(color: errorColor),
           hasFloatingPlaceholder: true),
       textCapitalization: textCapitalization,
@@ -502,7 +554,12 @@ class DesignTemplate extends Clasess {
     );
   }
 
-  Widget getAvatar(UsersProfile userProfile, {double radius: 100}) {
+  Widget getAvatar(UsersProfile userProfile, {String url, double radius: 100}) {
+    if (url != null) {
+      return new ClipOval(
+        child: networkCachedImage(url: url, provider: false),
+      );
+    }
     if (userProfile == null) {
       return CircleAvatar(
         child: Text(''),

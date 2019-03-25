@@ -33,7 +33,7 @@ class _ProfileComponetState extends State<ProfileComponet>
       child: ScopedModelDescendant<DataModel>(builder: (context, child, model) {
         return Container(
           padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-          height: _style.getheigth() - 160,
+          height: _style.getheigth(val: 60),
           width: _style.getwidth(),
           child: model.userProfile != null
               ? ListView(
@@ -44,7 +44,10 @@ class _ProfileComponetState extends State<ProfileComponet>
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: <Widget>[
-                            _style.getAvatar(model.userProfile, radius: 70),
+                            Container(
+                                height: _style.getheigth(val: 28),
+                                width: _style.getwidth(val: 50),
+                                child: _style.getAvatar(model.userProfile)),
                             SizedBox(
                               height: 10,
                             ),
@@ -53,26 +56,25 @@ class _ProfileComponetState extends State<ProfileComponet>
                             SizedBox(
                               height: 10,
                             ),
-                            Text('${_style.getValue(model.userProfile.email)}'),
+                            Text('${_style.getValue(model.userProfile.tel)}'),
                           ],
                         ),
                       ),
-                      elevation: 0,
+                      elevation: 10,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10))),
                     ),
                     Card(
-                        elevation: 0,
+                        elevation: 10,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
                             children: <Widget>[
                               ListTile(
                                 title: Text('Telphone: '),
-                                subtitle: Text(_style.getValue(
-                                    model.userProfile.tel,
-                                    isNotNul: model.userProfile.tel,
-                                    isNull: 'not set')),
+                                subtitle: Text(model.userProfile.tel == null
+                                    ? 'not set'
+                                    : model.userProfile.tel),
                                 contentPadding: EdgeInsets.all(0),
                               ),
                               ListTile(
@@ -96,7 +98,7 @@ class _ProfileComponetState extends State<ProfileComponet>
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10)))),
                     Card(
-                        elevation: 0,
+                        elevation: 10,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
@@ -129,7 +131,7 @@ class _ProfileComponetState extends State<ProfileComponet>
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10)))),
                     Card(
-                        elevation: 0,
+                        elevation: 10,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(

@@ -44,8 +44,7 @@ class _NotificationComponetState extends State<NotificationComponet>
                         .collection('profile')
                         .document(model.userProfile.uid)
                         .collection('inbox')
-                        .where('status', isEqualTo: false)
-                        .orderBy('time')
+                        .orderBy('time', descending: true)
                         .snapshots(),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
                       if (snapShot.hasData) {

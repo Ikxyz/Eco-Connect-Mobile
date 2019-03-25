@@ -19,8 +19,8 @@ void main() async {
   Widget _home;
   bool _firstRun = _localdb.getBool('init');
   int lastPage = _localdb.getInt('setCurrentHomePage');
-  //  print('First lunch ${_firstRun}');
-//  print('Currentg Logged in user ${_user}');
+  print('First lunch ${_firstRun}');
+  print('Currentg Logged in user ${_user}');
 
   if (_firstRun == null) {
     _firstRun = true;
@@ -91,8 +91,8 @@ class MyApp extends StatelessWidget {
         primaryColor: _myColor,
         primarySwatch: _myColor,
         fontFamily: 'Raleway',
-        brightness: Brightness.dark,
-        accentColor: _myColor.shade500,
+        brightness: Brightness.light,
+        accentColor: _myColor.shade100,
         accentColorBrightness: Brightness.dark,
       ),
       home: home,

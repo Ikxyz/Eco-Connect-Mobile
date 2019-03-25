@@ -96,6 +96,29 @@ class PAYMENT {
   }
 }
 
+class PickUpRequest {
+  String url, uid, agentUid;
+  bool isProcessing, isComplete;
+  dynamic requestTime, completeTime, acceptTime;
+
+  PickUpRequest(this.url, this.uid, this.agentUid, this.isProcessing,
+      this.isComplete, this.requestTime, this.completeTime, this.acceptTime);
+
+  factory PickUpRequest.object(Map<String, dynamic> map) {
+    return new PickUpRequest(
+        map['url'],
+        map['uid'],
+        map['agentUid'],
+        map['isProcessing'] != null ? map['isProcessing'] : false,
+        map['isComplete'] != null ? map['isComplete'] : false,
+        map['requestTime'] != null
+            ? map['requestTime']
+            : DateTime.now().toUtc(),
+        map['completeTime'],
+        map['acceptTime']);
+  }
+}
+
 class UsersProfile {
   String firstName,
       lastName,
@@ -112,19 +135,20 @@ class UsersProfile {
       uid;
   int time;
   double latitude, longitude;
-  bool isAdmin, isAgent, isMember, isDev, isVerified;
+  bool isAdmin, isAgent, isMember, isDev, isVerified, isOrg;
   dynamic online;
   UsersProfile(
       {@required this.firstName,
       @required this.lastName,
-      @required this.email,
+      @required this.address,
       @required this.tel,
-      @required this.state,
+      this.state,
+      this.email,
       this.isAdmin,
       this.isAgent,
+      this.isOrg,
       this.isDev,
       this.isMember,
-      this.address,
       this.city,
       this.country,
       this.zip,
@@ -150,6 +174,7 @@ class UsersProfile {
         isAdmin: map['isAdmin'],
         isAgent: map['isAgent'],
         isDev: map['isDev'],
+        isOrg: map['isOrg'],
         isMember: map['isMember'],
         city: map['city'],
         country: map['country'],
@@ -247,6 +272,7 @@ Map<String, dynamic> jsonUserProfile(
         isAgent,
         isDev,
         isMember,
+        isOrg,
         address,
         city,
         country,
@@ -271,6 +297,7 @@ Map<String, dynamic> jsonUserProfile(
       "isAgent": isAgent != null ? isAgent : false,
       "isDev": isDev != null ? isDev : false,
       "isMember": isMember != null ? isMember : true,
+      "isOrg": isOrg != null ? isOrg : false,
       "country": country,
       "zip": zip,
       "passport": passport,
@@ -288,6 +315,26 @@ Map<String, dynamic> jsonUserContacts() => {
       "time": null,
     };
 
+Map<String, dynamic> jsonPickUpRequest({
+  String url: '',
+  String uid: '',
+  String agentUid: '',
+  bool isProcessing: false,
+  bool isComplete: false,
+  dynamic requestTime,
+  dynamic completeTime,
+  dynamic acceptTime,
+}) =>
+    {
+      "url": url,
+      "uid": uid,
+      "agentUid": agentUid,
+      "isProcessing": false,
+      "isComplete": false,
+      "requestTime": requestTime == null ? DateTime.now().toUtc() : requestTime,
+      "completeTime": null,
+      "acceptTime": null,
+    };
 List<Map> tempUserDatabase = [
   {
     "uid": "7b11801b-3ab1-4564-afab-72436593163f",

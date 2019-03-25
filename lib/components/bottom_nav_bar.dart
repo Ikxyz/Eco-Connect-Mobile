@@ -42,9 +42,9 @@ class _BottomNavBarComponetState extends State<BottomNavBarComponet>
         BottomNavigationBarItem(
             backgroundColor: Colors.white,
             icon: Icon(
-              Icons.supervised_user_circle,
+              Icons.home,
             ),
-            title: Text("Public")),
+            title: Text("Dashboard")),
         BottomNavigationBarItem(
             icon: Icon(
               Icons.notifications,
@@ -52,9 +52,9 @@ class _BottomNavBarComponetState extends State<BottomNavBarComponet>
             title: Text("Notifications")),
         BottomNavigationBarItem(
             icon: Icon(
-              Icons.chat,
+              Icons.local_shipping,
             ),
-            title: Text("Chat")),
+            title: Text("Pick History")),
         BottomNavigationBarItem(
             icon: Icon(
               Icons.account_circle,

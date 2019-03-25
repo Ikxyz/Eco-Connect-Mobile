@@ -14,6 +14,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_connect/components/nav_bar.dart';
 import 'package:eco_connect/components/agent_list.dart';
 import 'package:eco_connect/components/bottom_nav_bar.dart';
+import 'package:eco_connect/classes/custom-clip.dart';
+import 'package:eco_connect/components/dashboard.dart';
+import 'package:eco_connect/components/pick_up_list.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -35,6 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     SharedPreferences.getInstance().then((_shared) {
       _sharedPreferences = _shared;
       setIndex(_shared.getInt('setCurrentHomePage'));
+      _shared.setBool('init', false);
     });
   }
 
@@ -85,9 +89,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     DesignTemplate _style = DesignTemplate(context);
     List<Widget> _pages = <Widget>[
-      AgentListComponet(),
+      DashBoardComponet(_model.homeScaffoldState),
       NotificationComponet(),
-      ChatComponet(),
+      PickUpListComponet(_model.homeScaffoldState),
       ProfileComponet(),
     ];
 
@@ -98,51 +102,57 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           return Scaffold(
             key: _model.homeScaffoldState,
             body: Container(
-              height: _style.getheigth(),
+              height: _style.getheigth(val: 95),
               width: _style.getwidth(),
               child: Column(
                 children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(left: 20, right: 20),
-                    height: 100,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              "CAC",
-                              style: _style.mTitleStyle(color: Colors.black),
-                            ),
-                            Text(
-                              "OA",
-                              style: _style.mTitleStyle(),
-                            ),
-                            Expanded(
-                              child: SizedBox(
-                                width: 10,
+                  ClipPath(
+                    clipper: CustomClip(),
+                    child: Container(
+                      color: Theme.of(context).primaryColor,
+                      padding: EdgeInsets.only(left: 20, right: 20),
+                      height: _style.getheigth(val: 30),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                "Eco-",
+                                style: _style.mTitleStyle(color: Colors.white),
                               ),
-                            ),
-                            FlatButton.icon(
-                                onPressed: () {},
-                                icon: Icon(
-                                  _numbersOfNewNotification > 0
-                                      ? Icons.notifications_active
-                                      : Icons.notifications,
-                                  color: _numbersOfNewNotification > 0
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.black,
+                              Text(
+                                "Connect",
+                                style: _style.mTitleStyle(color: Colors.green),
+                              ),
+                              Expanded(
+                                child: SizedBox(
+                                  width: 10,
                                 ),
-                                label: Text(
-                                    "${_numbersOfNewNotification}${_numbersOfNewNotification > 1 ? ' Notifications' : ' Notification'}")),
-                          ],
-                        ),
-                      ],
+                              ),
+                              FlatButton.icon(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    _numbersOfNewNotification > 0
+                                        ? Icons.notifications_active
+                                        : Icons.notifications,
+                                    color: _numbersOfNewNotification > 0
+                                        ? Theme.of(context).primaryColor
+                                        : Colors.white,
+                                  ),
+                                  label: Text(
+                                    "${_numbersOfNewNotification}${_numbersOfNewNotification > 1 ? ' Notifications' : ' Notification'}",
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Container(
-                    height: _style.getheigth() - 160,
+                    height: _style.getheigth(val: 61),
                     child: ListView(
                       physics: BouncingScrollPhysics(),
                       children: <Widget>[_pages[mIndex]],

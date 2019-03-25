@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:eco_connect/model/data.dart';
 import 'package:eco_connect/model/designtemplate.dart';
@@ -17,19 +18,23 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
   AnimationController _controller;
+
   PageController _pageController = PageController(initialPage: 0);
   TextEditingController _phoneNumberController =
       TextEditingController(text: '');
   TextEditingController _otpCode = TextEditingController(text: '');
+  UsersProfile _profile = UsersProfile.object(Map.from(jsonUserProfile()));
   String _message = '';
   FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   DesignTemplate _style;
   String _verificationId;
   GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  GlobalKey<FormState> _profileFormKey = GlobalKey<FormState>();
   SharedPreferences _sharedPreferences;
   bool _isworking = false;
-  Map<String, dynamic> _userProfile =
+  bool _isUploading = false;
+  Map<String, dynamic> _profileMapData =
       new Map<String, dynamic>.from(jsonUserProfile());
   @override
   Widget build(BuildContext context) {
@@ -54,29 +59,51 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
           duration: Duration(milliseconds: 500), curve: SawTooth(1));
     }
 
-    Future _createProfile(String uid) {
-      _userProfile['uid'] = uid;
+    Future _createProfile() {
+      setState(() {
+        _isworking = true;
+      });
+      String uid = _profileMapData['uid'];
+      if (uid == null) {
+        setState(() {
+          _isworking = false;
+        });
+        _goto(1);
+        mStyle.showSnackBar(_scaffoldState, 'Re-Authentication to continue');
+      }
+      if (_profileFormKey.currentState.validate() == false) {
+        setState(() {
+          _isworking = false;
+        });
+        return null;
+      }
+      _profileFormKey.currentState.save();
 
-      print(_userProfile);
+      print(_profileMapData);
       return _dataModel.db
           .collection('profile')
           .document(uid)
-          .setData(_userProfile)
+          .setData(_profileMapData)
           .then((res) {
         _dataModel.setCurrentUser(context);
-        _dataModel.setUserProfile(context);
         //Notity User on successfull account opening
         print('Account Opened Successfully');
+        setState(() {
+          _isworking = false;
+        });
         Navigator.of(context)
             .pushNamedAndRemoveUntil('home', (Route<dynamic> route) => false);
       }).catchError((err) {
+        setState(() {
+          _isworking = false;
+        });
         mStyle.showDialogBox(
             context: context,
             title: "Error creating account",
             desc: "",
             buttonText: "Try again",
             callBack: () {
-              _createProfile(uid);
+              _createProfile();
             });
       });
     }
@@ -109,6 +136,7 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
           content:
               const Text('Please check your phone for the verification code.'),
         ));
+        _profileMapData['tel'] = '+234' + _phoneNumberController.text;
         _goto(2);
         setState(() {
           _isworking = false;
@@ -131,6 +159,11 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
           codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
     }
 
+    Future<bool> _hasAccount(String uid) async {
+      var acc = await _dataModel.db.collection('profile').document(uid).get();
+      return acc.exists;
+    }
+
     void _signInWithPhoneNumber() async {
       setState(() {
         _isworking = true;
@@ -139,61 +172,18 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
           verificationId: _verificationId, smsCode: _otpCode.text);
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
-      setState(() {
+      setState(() async {
         if (user != null) {
           _message = ' in, uid: ' + user.uid;
           setState(() {
             _isworking = false;
+            _profileMapData['uid'] = user.uid;
           });
-          showDialog(
-              context: context,
-              builder: ((context) {
-                return Container(
-                  color: Colors.white,
-                  height: mStyle.getheigth(),
-                  width: mStyle.getwidth(),
-                  child: Card(
-                    color: Colors.white,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 200,
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          'Success',
-                          style: mStyle.mTitleStyle(color: Colors.green),
-                        ),
-                        SizedBox(
-                          height: 60,
-                        ),
-                        RaisedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'NEXT',
-                            style: mStyle.mTitleStyle(color: Colors.white),
-                          ),
-                          shape: StadiumBorder(),
-                          elevation: 8,
-                          padding: EdgeInsets.only(
-                              top: 10, bottom: 10, left: 50, right: 50),
-                          textColor: Colors.white,
-                          animationDuration: Duration(seconds: 1),
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              }));
+          if (await _hasAccount(user.uid) == true) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                'home', (Route<dynamic> route) => false);
+          }
+          _goto(3);
         } else {
           setState(() {
             _isworking = false;
@@ -203,6 +193,32 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
               title: 'Sign in failed',
               desc: 'Unable to sign in at the moment.');
         }
+      });
+    }
+
+    void _fetchAndUploadPassport(bool camera) async {
+      setState(() {
+        _isUploading = true;
+      });
+      File file = await mStyle.getImage(camera: camera);
+      if (file == null) {
+        mStyle.showSnackBar(_scaffoldState, 'Invalid File');
+        setState(() {
+          _isUploading = false;
+        });
+      }
+      print('Got file ${file.path}');
+      String url = await mStyle.uploadFile(file, _profileMapData['uid']);
+      if (url == null) {
+        setState(() {
+          _isUploading = false;
+        });
+        return mStyle.showSnackBar(_scaffoldState, 'Invalid File');
+      }
+      print('This is the download Url $url');
+      setState(() {
+        _profileMapData['passport'] = url;
+        _isUploading = false;
       });
     }
 
@@ -252,6 +268,8 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
                   ),
                   RaisedButton.icon(
                     onPressed: () {
+                      _profileMapData['isMember'] = true;
+                      _profileMapData['isAgent'] = false;
                       _goto(1);
                     },
                     shape: StadiumBorder(),
@@ -265,6 +283,8 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
                   ),
                   RaisedButton.icon(
                     onPressed: () {
+                      _profileMapData['isAgent'] = true;
+                      _profileMapData['isMember'] = false;
                       _goto(1);
                     },
                     shape: StadiumBorder(),
@@ -422,7 +442,7 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
           ],
         ),
         //#endregion
-        //#region******************* Enter OTP CODEr **************************************************************
+        //#region******************* Enter OTP CODE **************************************************************
         new ListView(
           physics: BouncingScrollPhysics(),
           children: <Widget>[
@@ -434,31 +454,32 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Container(
-                    height: mStyle.getheigth(val: 20),
-                    color: Theme.of(context).primaryColor,
-                    child: Image.asset(
-                      'assets/image/eco-connect.png',
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.high,
-                      height: mStyle.getheigth(val: 20),
-                      width: mStyle.getwidth(),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.center,
-                  ),
-                  Container(
-                    height: mStyle.getheigth(val: 20),
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      'Enter the six digit pin sent to you at \n \nxxx-${_phoneNumberController.text}',
-                      style: TextStyle(
-                        fontSize: 18,
+                  ClipPath(
+                    child: Container(
+                      height: mStyle.getheigth(val: 40),
+                      color: Theme.of(context).primaryColor,
+                      child: Column(
+                        children: <Widget>[
+                          Image.asset(
+                            'assets/image/eco-connect.png',
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            height: mStyle.getheigth(val: 20),
+                            width: mStyle.getwidth(),
+                          ),
+                          Text(
+                            'Enter the six digit pin sent to you at \n \nxxx-${_phoneNumberController.text}',
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        ],
                       ),
-                      textAlign: TextAlign.center,
+                      padding: const EdgeInsets.all(16),
+                      alignment: Alignment.center,
                     ),
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.center,
+                    clipper: CustomClip(),
                   ),
                   Container(
                     height: mStyle.getheigth(val: 60),
@@ -554,6 +575,154 @@ class _SetupState extends State<Setup> with SingleTickerProviderStateMixin {
                           ),
                         )
                       ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        //#endregion
+        //#region******************* Enter Profile details **************************************************************
+        new ListView(
+          physics: BouncingScrollPhysics(),
+          children: <Widget>[
+            new Container(
+              height: MediaQuery.of(context).size.height,
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  ClipPath(
+                    child: Container(
+                      height: mStyle.getheigth(val: 40),
+                      color: Theme.of(context).primaryColor,
+                      child: Column(
+                        children: <Widget>[
+                          _isUploading
+                              ? CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor:
+                                      AlwaysStoppedAnimation(Colors.white),
+                                )
+                              : Container(
+                                  height: mStyle.getheigth(val: 25),
+                                  width: mStyle.getheigth(val: 25),
+                                  child: _profileMapData['passport'] == null
+                                      ? Icon(Icons.account_circle,
+                                          size: mStyle.getwidth(val: 40))
+                                      : mStyle.getAvatar(null,
+                                          url: _profileMapData['passport'],
+                                          radius: 50),
+                                ),
+                          FlatButton.icon(
+                            label: Text('Upload photo'),
+                            icon: Icon(Icons.camera_alt),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 100,
+                                      color: Colors.white,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: <Widget>[
+                                          RaisedButton.icon(
+                                              onPressed: () {
+                                                _fetchAndUploadPassport(true);
+                                                Navigator.of(context).pop();
+                                              },
+                                              icon: Icon(Icons.camera_alt),
+                                              label: Text('Take new photo')),
+                                          RaisedButton.icon(
+                                              onPressed: () {
+                                                _fetchAndUploadPassport(false);
+                                                Navigator.of(context).pop();
+                                              },
+                                              icon: Icon(Icons.folder),
+                                              label: Text('Pick from file'))
+                                        ],
+                                      ),
+                                    );
+                                  });
+                            },
+                            shape: StadiumBorder(),
+                            textColor: Colors.white,
+                          )
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      alignment: Alignment.center,
+                    ),
+                    clipper: CustomClip(),
+                  ),
+                  Container(
+                    height: mStyle.getheigth(val: 60),
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    child: Form(
+                      autovalidate: false,
+                      key: _profileFormKey,
+                      onChanged: () {},
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          mStyle.mTextFormField(context, onSaved: (val) {
+                            _profileMapData['isAgent'] = true;
+                            _profileMapData['firstName'] = val;
+                          },
+                              autovalidate: false,
+                              autocorrect: true,
+                              validator: mStyle.isNotNull,
+                              hintText: 'Enter first name',
+                              labelText: 'First Name',
+                              suffix: Icon(Icons.edit)),
+                          mStyle.mTextFormField(context, onSaved: (val) {
+                            _profileMapData['lastName'] = val;
+                          },
+                              autovalidate: false,
+                              autocorrect: true,
+                              validator: mStyle.isNotNull,
+                              hintText: 'Enter last name',
+                              labelText: 'Last Name',
+                              suffix: Icon(Icons.edit)),
+                          mStyle.mTextFormField(context, onSaved: (val) {
+                            _profileMapData['address'] = val;
+                          },
+                              autovalidate: false,
+                              autocorrect: true,
+                              validator: mStyle.isNotNull,
+                              hintText: 'Enter address',
+                              labelText: 'Address',
+                              suffix: Icon(Icons.home)),
+                          Container(
+                              alignment: Alignment.center,
+                              child: Visibility(
+                                visible: _isworking,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                                replacement: RaisedButton(
+                                  onPressed: _createProfile,
+                                  shape: StadiumBorder(),
+                                  child: const Text('Next'),
+                                ),
+                              )),
+                          Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              _message,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],
