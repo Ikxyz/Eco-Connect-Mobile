@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:eco_connect/model/data.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:eco_connect/model/designtemplate.dart';
+import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class NavBarComponet extends StatelessWidget {
   @override
@@ -30,7 +30,9 @@ class NavBarComponet extends StatelessWidget {
                 }),
                 currentAccountPicture: ScopedModelDescendant<DataModel>(
                     builder: (context, child, model) {
-                  return _template.getAvatar(model.userProfile);
+                  return CircleAvatar(
+                    child: Icon(Icons.account_circle),
+                  );
                 }),
               )
             ],

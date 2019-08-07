@@ -1,22 +1,18 @@
 import 'dart:async';
-import 'package:eco_connect/components/Chat.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eco_connect/classes/custom-clip.dart';
+import 'package:eco_connect/components/bottom_nav_bar.dart';
+import 'package:eco_connect/components/dashboard.dart';
 import 'package:eco_connect/components/notification.dart';
+import 'package:eco_connect/components/pick_up_list.dart';
 import 'package:eco_connect/components/profile.dart';
+import 'package:eco_connect/model/data.dart';
 import 'package:eco_connect/model/designtemplate.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:eco_connect/model/data.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:eco_connect/components/componets.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eco_connect/components/nav_bar.dart';
-import 'package:eco_connect/components/agent_list.dart';
-import 'package:eco_connect/components/bottom_nav_bar.dart';
-import 'package:eco_connect/classes/custom-clip.dart';
-import 'package:eco_connect/components/dashboard.dart';
-import 'package:eco_connect/components/pick_up_list.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -147,6 +143,29 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                   )),
                             ],
                           ),
+                          Container(
+                            width: _style.getwidth(),
+                            child: model.userProfile == null
+                                ? SizedBox()
+                                : model.userProfile.isAgent
+                                    ? Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.person_pin,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            'Agent Accont',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(
+                                                color: Colors.green,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
+                                          )
+                                        ],
+                                      )
+                                    : SizedBox(),
+                          )
                         ],
                       ),
                     ),

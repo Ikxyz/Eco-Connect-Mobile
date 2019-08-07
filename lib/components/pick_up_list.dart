@@ -1,15 +1,9 @@
-import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:flutter_countdown/flutter_countdown.dart';
-import 'package:flutter/material.dart';
-import 'package:eco_connect/model/data.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:eco_connect/model/designtemplate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_connect/classes/classes.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eco_connect/classes/custom-clip.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eco_connect/model/data.dart';
+import 'package:eco_connect/model/designtemplate.dart';
+import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class PickUpListComponet extends StatefulWidget {
   GlobalKey<ScaffoldState> _scaffoldState;
@@ -103,23 +97,11 @@ class _PickUpListComponetState extends State<PickUpListComponet>
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return Container(
-                                                  child: CachedNetworkImage(
-                                                    imageUrl: doc.url,
-                                                    fit: BoxFit.cover,
-                                                    placeholder:
-                                                        (context, url) {
-                                                      return CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                      );
-                                                    },
-                                                  ),
+                                                  child: Image.network(doc.url),
                                                 );
                                               });
                                         },
-                                        child: CachedNetworkImage(
-                                          imageUrl: doc.url,
-                                          fit: BoxFit.contain,
-                                        ),
+                                        child: Image.network(doc.url),
                                       ),
                                     ),
                                     title: Text(

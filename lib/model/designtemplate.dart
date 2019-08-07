@@ -1,17 +1,15 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
-import 'package:path/path.dart' as xPath;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:scoped_model/scoped_model.dart';
+
 import 'package:eco_connect/classes/classes.dart';
 import 'package:eco_connect/model/data.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'package:random_string/random_string.dart' as random;
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as xPath;
+import 'package:random_string/random_string.dart' as random;
+import 'package:scoped_model/scoped_model.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class DesignTemplate extends Clasess {
   BuildContext context;
@@ -75,61 +73,61 @@ class DesignTemplate extends Clasess {
     return null;
   }
 
-  Widget chatBubble(
-      MESSAGE msg, UsersProfile personOne, UsersProfile personTwo) {
-    bool isSender = msg.from == personOne.uid;
-
-    return Container(
-      margin: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 5),
-      child: Card(
-        elevation: 0,
-        color: isSender ? Colors.grey.shade300 : Colors.teal.shade50,
-        margin: isSender
-            ? EdgeInsets.only(left: getwidth(val: 20))
-            : EdgeInsets.only(right: getwidth(val: 20)),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20))),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: <Widget>[
-              isSender
-                  ? Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(msg.msg),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Container(
-                          child: getAvatar(personOne, radius: 40),
-                          height: 40,
-                          width: 40,
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: <Widget>[
-                        Container(
-                          child: getAvatar(personTwo, radius: 40),
-                          height: 40,
-                          width: 40,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: Text(msg.msg),
-                        ),
-                      ],
-                    )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+//  Widget chatBubble(
+//      MESSAGE msg, UsersProfile personOne, UsersProfile personTwo) {
+//    bool isSender = msg.from == personOne.uid;
+//
+//    return Container(
+//      margin: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 5),
+//      child: Card(
+//        elevation: 0,
+//        color: isSender ? Colors.grey.shade300 : Colors.teal.shade50,
+//        margin: isSender
+//            ? EdgeInsets.only(left: getwidth(val: 20))
+//            : EdgeInsets.only(right: getwidth(val: 20)),
+//        shape: RoundedRectangleBorder(
+//            borderRadius: BorderRadius.all(Radius.circular(20))),
+//        child: Padding(
+//          padding: const EdgeInsets.all(10.0),
+//          child: Column(
+//            children: <Widget>[
+//              isSender
+//                  ? Row(
+//                      children: <Widget>[
+//                        Expanded(
+//                          child: Text(msg.msg),
+//                        ),
+//                        SizedBox(
+//                          width: 10,
+//                        ),
+//                        Container(
+//                          child: getAvatar(personOne, radius: 40),
+//                          height: 40,
+//                          width: 40,
+//                        ),
+//                      ],
+//                    )
+//                  : Row(
+//                      children: <Widget>[
+//                        Container(
+//                          child: getAvatar(personTwo, radius: 40),
+//                          height: 40,
+//                          width: 40,
+//                        ),
+//                        SizedBox(
+//                          width: 10,
+//                        ),
+//                        Expanded(
+//                          child: Text(msg.msg),
+//                        ),
+//                      ],
+//                    )
+//            ],
+//          ),
+//        ),
+//      ),
+//    );
+//  }
 
   dynamic getValue(val, {isNull: '', isNotNul}) {
     if (val == null) return isNull;
@@ -310,79 +308,79 @@ class DesignTemplate extends Clasess {
         });
   }
 
-  void showProfileDialogBox(
-      {@required UsersProfile userProfile,
-      Function onTap,
-      buttonText: "Close",
-      Function callBack}) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Card(
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  height: getheigth(val: 70),
-                  child: ListView(
-                    children: <Widget>[
-                      Container(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: getAvatar(userProfile, radius: 100),
-                        ),
-                        width: 50,
-                        margin: EdgeInsets.only(
-                            left: getwidth() * 0.1, right: getwidth() * 0.1),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Center(
-                        child: Text(
-                          " ${getValue(userProfile.online, isNull: '')}",
-                          style: TextStyle(
-                              color: userProfile.online == "online"
-                                  ? Colors.green
-                                  : Colors.black),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                          "Name: ${userProfile.lastName} ${userProfile.firstName}"),
-                      Text(
-                          "State ${getValue(userProfile.state, isNotNul: userProfile.state, isNull: '')}"),
-                      Text(
-                          "City:  ${userProfile.city != null ? userProfile.city : ''}"),
-                      Text(
-                          "Country:  ${userProfile.country != null ? userProfile.country : ''}"),
-                      SizedBox(height: 10),
-                      Center(
-                        child: FlatButton.icon(
-                            onPressed: () {
-                              try {
-                                onTap();
-                              } catch (err) {}
-                            },
-                            color: Theme.of(context).primaryColor,
-                            icon: Icon(Icons.message),
-                            textColor: Colors.white,
-                            label: Text('Begin registration')),
-                      ),
-                    ],
-                  ),
-                ),
-                margin: EdgeInsets.only(left: 20, right: 20),
-              ),
-            ],
-          );
-        });
-  }
+//  void showProfileDialogBox(
+//      {@required UsersProfile userProfile,
+//      Function onTap,
+//      buttonText: "Close",
+//      Function callBack}) {
+//    showDialog(
+//        context: context,
+//        builder: (BuildContext context) {
+//          return Column(
+//            crossAxisAlignment: CrossAxisAlignment.center,
+//            mainAxisAlignment: MainAxisAlignment.center,
+//            mainAxisSize: MainAxisSize.min,
+//            children: <Widget>[
+//              Card(
+//                child: Container(
+//                  padding: EdgeInsets.all(20),
+//                  height: getheigth(val: 70),
+//                  child: ListView(
+//                    children: <Widget>[
+//                      Container(
+//                        child: Padding(
+//                          padding: const EdgeInsets.all(8.0),
+//                          child: getAvatar(userProfile, radius: 100),
+//                        ),
+//                        width: 50,
+//                        margin: EdgeInsets.only(
+//                            left: getwidth() * 0.1, right: getwidth() * 0.1),
+//                      ),
+//                      SizedBox(
+//                        height: 10,
+//                      ),
+//                      Center(
+//                        child: Text(
+//                          " ${getValue(userProfile.online, isNull: '')}",
+//                          style: TextStyle(
+//                              color: userProfile.online == "online"
+//                                  ? Colors.green
+//                                  : Colors.black),
+//                        ),
+//                      ),
+//                      SizedBox(
+//                        height: 10,
+//                      ),
+//                      Text(
+//                          "Name: ${userProfile.lastName} ${userProfile.firstName}"),
+//                      Text(
+//                          "State ${getValue(userProfile.state, isNotNul: userProfile.state, isNull: '')}"),
+//                      Text(
+//                          "City:  ${userProfile.city != null ? userProfile.city : ''}"),
+//                      Text(
+//                          "Country:  ${userProfile.country != null ? userProfile.country : ''}"),
+//                      SizedBox(height: 10),
+//                      Center(
+//                        child: FlatButton.icon(
+//                            onPressed: () {
+//                              try {
+//                                onTap();
+//                              } catch (err) {}
+//                            },
+//                            color: Theme.of(context).primaryColor,
+//                            icon: Icon(Icons.message),
+//                            textColor: Colors.white,
+//                            label: Text('Begin registration')),
+//                      ),
+//                    ],
+//                  ),
+//                ),
+//                margin: EdgeInsets.only(left: 20, right: 20),
+//              ),
+//            ],
+//          );
+//        });
+//  }
 
   void showProfileUpdateDialog(
       {@required Map<String, dynamic> updateNode, @required context}) {
@@ -468,72 +466,72 @@ class DesignTemplate extends Clasess {
     });
   }
 
-  dynamic networkCachedImage(
-      {@required url, @required provider: true, raduis}) {
-    if (provider)
-      return CachedNetworkImageProvider(url,
-          errorListener: () => CircularProgressIndicator());
+//  dynamic networkCachedImage(
+//      {@required url, @required provider: true, raduis}) {
+//    if (provider)
+//      return CachedNetworkImageProvider(url,
+//          errorListener: () => CircularProgressIndicator());
+//
+//    return CachedNetworkImage(
+//        imageUrl: url,
+//        fit: BoxFit.fill,
+//        errorWidget: (context, url, error) => Center(
+//              child: CircularProgressIndicator(
+//                strokeWidth: 1,
+//              ),
+//            ),
+//        placeholder: (context, url) => Center(
+//              child: CircularProgressIndicator(
+//                strokeWidth: 1,
+//              ),
+//            ));
+//  }
 
-    return CachedNetworkImage(
-        imageUrl: url,
-        fit: BoxFit.fill,
-        errorWidget: (context, url, error) => Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 1,
-              ),
-            ),
-        placeholder: (context, url) => Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 1,
-              ),
-            ));
-  }
-
-  Widget getMinProfileCard(UsersProfile userProfile, Function onTap) {
-    return Container(
-      width: MediaQuery.of(context).size.width / 2,
-      child: GestureDetector(
-        onTap: () {
-          showProfileDialogBox(userProfile: userProfile, onTap: onTap);
-        },
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: getAvatar(userProfile, radius: 60),
-                    ),
-                    Icon(
-                      Icons.brightness_1,
-                      size: 10,
-                      color: userProfile.online == "online"
-                          ? Colors.green
-                          : Colors.grey,
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text("${userProfile.lastName} ${userProfile.firstName}"),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                    " ${getValue(userProfile.state, isNotNul: userProfile.state, isNull: '')}"),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+//  Widget getMinProfileCard(UsersProfile userProfile, Function onTap) {
+//    return Container(
+//      width: MediaQuery.of(context).size.width / 2,
+//      child: GestureDetector(
+//        onTap: () {
+//          showProfileDialogBox(userProfile: userProfile, onTap: onTap);
+//        },
+//        child: Card(
+//          child: Padding(
+//            padding: const EdgeInsets.all(8.0),
+//            child: Column(
+//              children: <Widget>[
+//                Row(
+//                  mainAxisSize: MainAxisSize.max,
+//                  crossAxisAlignment: CrossAxisAlignment.start,
+//                  mainAxisAlignment: MainAxisAlignment.start,
+//                  children: <Widget>[
+//                    Expanded(
+//                      child: getAvatar(userProfile, radius: 60),
+//                    ),
+//                    Icon(
+//                      Icons.brightness_1,
+//                      size: 10,
+//                      color: userProfile.online == "online"
+//                          ? Colors.green
+//                          : Colors.grey,
+//                    )
+//                  ],
+//                ),
+//                SizedBox(
+//                  height: 10,
+//                ),
+//                Text("${userProfile.lastName} ${userProfile.firstName}"),
+//                SizedBox(
+//                  height: 10,
+//                ),
+//                Text(
+//                    " ${getValue(userProfile.state, isNotNul: userProfile.state, isNull: '')}"),
+//              ],
+//            ),
+//          ),
+//        ),
+//      ),
+//    );
+//  }
 
   dynamic userInterface({@required child, opacity: 0.5}) {
     return new Container(
@@ -553,48 +551,49 @@ class DesignTemplate extends Clasess {
       ),
     );
   }
-
-  Widget getAvatar(UsersProfile userProfile, {String url, double radius: 100}) {
-    if (url != null) {
-      return new ClipOval(
-        child: networkCachedImage(url: url, provider: false),
-      );
-    }
-    if (userProfile == null) {
-      return CircleAvatar(
-        child: Text(''),
-        radius: radius,
-      );
-    }
-    if (userProfile.passport == null) {
-      return CircleAvatar(
-        child: userProfile.lastName != null
-            ? Text(
-                '${userProfile.lastName.substring(0, 1)}${userProfile.firstName.substring(0, 1)}',
-                style: TextStyle(fontSize: radius * 0.5),
-              )
-            : Text(''),
-        radius: radius,
-      );
-    }
-    return new ClipOval(
-      child: networkCachedImage(url: userProfile.passport, provider: false),
-    );
-
-//      CircleAvatar(
-//      radius: 50,
-//      backgroundImage:
-//          networkCachedImage(url: userProfile.passport, provider: true),
+//
+//  Widget getAvatar(UsersProfile userProfile, {String url, double radius: 100}) {
+//    if (url != null) {
+//      return new ClipOval(
+//        child: networkCachedImage(url: url, provider: false),
+//      );
+//    }
+//    if (userProfile == null) {
+//      return CircleAvatar(
+//        child: Text(''),
+//        radius: radius,
+//      );
+//    }
+//    if (userProfile.passport == null) {
+//      return CircleAvatar(
+//        child: userProfile.lastName != null
+//            ? Text(
+//                '${userProfile.lastName.substring(0, 1)}${userProfile.firstName.substring(0, 1)}',
+//                style: TextStyle(fontSize: radius * 0.5),
+//              )
+//            : Text(''),
+//        radius: radius,
+//      );
+//    }
+//    return new ClipOval(
+//      child: networkCachedImage(url: userProfile.passport, provider: false),
 //    );
+//
+////      CircleAvatar(
+////      radius: 50,
+////      backgroundImage:
+////          networkCachedImage(url: userProfile.passport, provider: true),
+////    );
+//
+////    Container(
+////        height: radius * 2,
+////        decoration: BoxDecoration(
+////            shape: BoxShape.circle,
+////            image: DecorationImage(
+////                image: networkCachedImage(
+////                    url: userProfile.passport,
+////                    provider: true,
+////                    raduis: radius))));
+//  }
 
-//    Container(
-//        height: radius * 2,
-//        decoration: BoxDecoration(
-//            shape: BoxShape.circle,
-//            image: DecorationImage(
-//                image: networkCachedImage(
-//                    url: userProfile.passport,
-//                    provider: true,
-//                    raduis: radius))));
-  }
 }

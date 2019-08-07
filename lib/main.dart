@@ -1,16 +1,14 @@
 import 'dart:ui';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
-import 'package:eco_connect/route/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:eco_connect/route/setup.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:eco_connect/model/designtemplate.dart';
 import 'package:eco_connect/model/data.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:eco_connect/model/designtemplate.dart';
+import 'package:eco_connect/route/home.dart';
+import 'package:eco_connect/route/setup.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   SharedPreferences _localdb = await SharedPreferences.getInstance();

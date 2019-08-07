@@ -1,6 +1,6 @@
 import 'package:eco_connect/model/data.dart';
-import 'package:flutter/material.dart';
 import 'package:eco_connect/model/designtemplate.dart';
+import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ProfileComponet extends StatefulWidget {
@@ -32,7 +32,10 @@ class _ProfileComponetState extends State<ProfileComponet>
       model: _model,
       child: ScopedModelDescendant<DataModel>(builder: (context, child, model) {
         return Container(
-          padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+          ),
           height: _style.getheigth(val: 60),
           width: _style.getwidth(),
           child: model.userProfile != null
@@ -41,13 +44,16 @@ class _ProfileComponetState extends State<ProfileComponet>
                   children: <Widget>[
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                         child: Column(
                           children: <Widget>[
                             Container(
-                                height: _style.getheigth(val: 28),
-                                width: _style.getwidth(val: 50),
-                                child: _style.getAvatar(model.userProfile)),
+                              height: 200,
+                              width: 200,
+                              child: CircleAvatar(
+                                child: Icon(Icons.account_circle),
+                              ),
+                            ),
                             SizedBox(
                               height: 10,
                             ),
@@ -67,7 +73,7 @@ class _ProfileComponetState extends State<ProfileComponet>
                     Card(
                         elevation: 10,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Column(
                             children: <Widget>[
                               ListTile(
@@ -100,7 +106,7 @@ class _ProfileComponetState extends State<ProfileComponet>
                     Card(
                         elevation: 10,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Column(
                             children: <Widget>[
                               ListTile(
@@ -133,7 +139,7 @@ class _ProfileComponetState extends State<ProfileComponet>
                     Card(
                         elevation: 10,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Column(
                             children: <Widget>[
                               SizedBox(

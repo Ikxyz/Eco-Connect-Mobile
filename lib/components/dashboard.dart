@@ -1,13 +1,11 @@
 import 'dart:io';
-import 'package:flutter_countdown/flutter_countdown.dart';
-import 'package:flutter/material.dart';
-import 'package:eco_connect/model/data.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:eco_connect/model/designtemplate.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_connect/classes/classes.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eco_connect/classes/custom-clip.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eco_connect/model/data.dart';
+import 'package:eco_connect/model/designtemplate.dart';
+import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class DashBoardComponet extends StatefulWidget {
   GlobalKey<ScaffoldState> _state = GlobalKey<ScaffoldState>();
@@ -123,132 +121,266 @@ class _DashBoardComponetState extends State<DashBoardComponet>
   Widget build(BuildContext context) {
     _style = DesignTemplate(context);
     _model = DataModel(context);
-
-    return ScopedModel<DataModel>(
-      model: _model,
-      child: ScopedModelDescendant<DataModel>(builder: (context, child, model) {
-        _usersProfile = model.userProfile;
-        return Container(
-          height: _style.getheigth(val: 61),
-          child: ListView(
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              Container(
-                height: _style.getheigth(val: 30),
-                width: _style.getwidth(),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      child: Text(
-                        '# 0.00',
-                        style: TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                      radius: 60,
+    Widget _isMember(model) {
+      return Container(
+        height: _style.getheigth(val: 61),
+        child: ListView(
+          physics: BouncingScrollPhysics(),
+          children: <Widget>[
+            Container(
+              height: _style.getheigth(val: 30),
+              width: _style.getwidth(),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: Text(
+                      '# 0.00',
+                      style: TextStyle(fontSize: 30, color: Colors.white),
                     ),
-                  ),
-                  elevation: 10,
-                  shape: CircleBorder(),
-                ),
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              Container(
-                padding: EdgeInsets.only(
-                    left: _style.getwidth(val: 10),
-                    right: _style.getwidth(val: 10)),
-                child: Visibility(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  ),
-                  visible: _isRequesting,
-                  replacement: FlatButton.icon(
-                    onPressed: () {
-                      _fetchAndUploadPassport(true);
-                    },
-                    icon: Icon(Icons.local_shipping),
-                    label: Text(
-                      'Request Pickup',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    shape: StadiumBorder(),
-                    textColor: Theme.of(context).primaryColor,
+                    radius: 60,
                   ),
                 ),
+                elevation: 10,
+                shape: CircleBorder(),
               ),
-              SizedBox(
-                height: 20,
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Container(
+              padding: EdgeInsets.only(
+                  left: _style.getwidth(val: 10),
+                  right: _style.getwidth(val: 10)),
+              child: Visibility(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                visible: _isRequesting,
+                replacement: FlatButton.icon(
+                  onPressed: () {
+                    _fetchAndUploadPassport(true);
+                  },
+                  icon: Icon(Icons.local_shipping),
+                  label: Text(
+                    'Request Pickup',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  shape: StadiumBorder(),
+                  textColor: Theme.of(context).primaryColor,
+                ),
               ),
-              _usersProfile == null
-                  ? Container(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            _usersProfile == null
+                ? Container(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
                       ),
-                    )
-                  : StreamBuilder(
-                      stream: _model.db
-                          .collection('profile')
-                          .document(_usersProfile.uid)
-                          .collection('pickup')
-                          .where('isComplete', isEqualTo: false)
-                          .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapShot) {
-                        if (snapShot.hasData) {
-                          if (snapShot.data.documents.length == 0) {
-                            return Container(
-                              child: Center(
-                                child: Text('No pending pick up'),
-                              ),
-                            );
-                          }
-                          return Column(
-                            children: snapShot.data.documentChanges
-                                .map((docSnapshaot) {
-                              PickUpRequest doc = PickUpRequest.object(
-                                  Map.of(docSnapshaot.document.data));
-                              DateTime reqTime = doc.requestTime;
-                              String sec = '0:00:00';
-                              return Container(
-                                width: _style.getwidth(),
-                                child: Card(
-                                  elevation: 10,
-                                  child: ListTile(
-                                    leading: Container(
-                                      width: 50,
-                                      height: 50,
-                                      child: _style.getAvatar(null,
-                                          url: doc.url, radius: 20),
-                                    ),
-                                    title: Text(
-                                      'Current Pickup',
-                                      style: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                    subtitle: Text('Undergoing Processing'),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        } else {
+                    ),
+                  )
+                : StreamBuilder(
+                    stream: _model.db
+                        .collection('profile')
+                        .document(_usersProfile.uid)
+                        .collection('pickup')
+                        .where('isComplete', isEqualTo: false)
+                        .snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapShot) {
+                      if (snapShot.hasData) {
+                        if (snapShot.data.documents.length == 0) {
                           return Container(
                             child: Center(
                               child: Text('No pending pick up'),
                             ),
                           );
                         }
-                      }),
-            ],
-          ),
-        );
+                        return Column(
+                          children:
+                              snapShot.data.documentChanges.map((docSnapshaot) {
+                            PickUpRequest doc = PickUpRequest.object(
+                                Map.of(docSnapshaot.document.data));
+                            DateTime reqTime = doc.requestTime;
+                            String sec = '0:00:00';
+                            return Container(
+                              width: _style.getwidth(),
+                              child: Card(
+                                elevation: 10,
+                                child: ListTile(
+                                  leading: Container(
+                                    width: 50,
+                                    height: 50,
+                                    child: CircleAvatar(
+                                      child: Icon(Icons.account_circle),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    'Current Pickup',
+                                    style: TextStyle(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  subtitle: Text('Undergoing Processing'),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      } else {
+                        return Container(
+                          child: Center(
+                            child: Text('No pending pick up'),
+                          ),
+                        );
+                      }
+                    }),
+          ],
+        ),
+      );
+    } // isMember
+
+    Widget _isAgent(model) {
+      return Container(
+        height: _style.getheigth(val: 61),
+        child: ListView(
+          physics: BouncingScrollPhysics(),
+          children: <Widget>[
+            ListTile(
+              leading: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.amber,
+                    child: Text(
+                      '0',
+                      style: TextStyle(fontSize: 30, color: Colors.white),
+                    ),
+                    radius: 40,
+                  ),
+                ),
+                elevation: 10,
+                shape: CircleBorder(),
+              ),
+              title: Text('Pending pick up request'),
+              subtitle: Text('Total numbers waste ready for pick up'),
+            ),
+            ListTile(
+              leading: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.red,
+                    child: Text(
+                      '0',
+                      style: TextStyle(fontSize: 30, color: Colors.white),
+                    ),
+                    radius: 40,
+                  ),
+                ),
+                elevation: 10,
+                shape: CircleBorder(),
+              ),
+              title: Text('Failed pick up request'),
+              subtitle: Text('Total numbers waste ready for pick up'),
+            ),
+            ListTile(
+              leading: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Text(
+                      '0',
+                      style: TextStyle(fontSize: 30, color: Colors.white),
+                    ),
+                    radius: 40,
+                  ),
+                ),
+                elevation: 10,
+                shape: CircleBorder(),
+              ),
+              title: Text('Avaliable pick up'),
+              subtitle: Text(
+                  'Total numbers avaliable waste close to you for pick up'),
+            ),
+            ListTile(
+              leading: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.green,
+                    child: Text(
+                      '0',
+                      style: TextStyle(fontSize: 30, color: Colors.white),
+                    ),
+                    radius: 40,
+                  ),
+                ),
+                elevation: 10,
+                shape: CircleBorder(),
+              ),
+              title: Text('Sccessfully pick up'),
+              subtitle: Text('Total numbers sccussfull pick up'),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Container(
+              padding: EdgeInsets.only(
+                  left: _style.getwidth(val: 10),
+                  right: _style.getwidth(val: 10)),
+              child: Visibility(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                visible: _isRequesting,
+                replacement: FlatButton.icon(
+                  onPressed: () {
+                    _fetchAndUploadPassport(true);
+                  },
+                  icon: Icon(Icons.delete_sweep),
+                  label: Text(
+                    'Accept Waste',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  shape: StadiumBorder(),
+                  textColor: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } // is Agent
+
+    Widget _isOrg() {}
+    return ScopedModel<DataModel>(
+      model: _model,
+      child: ScopedModelDescendant<DataModel>(builder: (context, child, model) {
+        _usersProfile = model.userProfile;
+        if (_usersProfile == null) {
+          return Container(
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+        if (_usersProfile.isMember) {
+          return _isMember(model);
+        }
+        if (_usersProfile.isAgent) {
+          return _isAgent(model);
+        }
       }),
     );
   }
